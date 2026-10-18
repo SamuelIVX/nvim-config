@@ -35,7 +35,7 @@ return {
       end,
     })
     require("mason-lspconfig").setup({
-      ensure_installed = require("conf.tools").servers,
+      ensure_installed = vim.env.NVIM_CONFIG_OPERATION and {} or require("conf.tools").servers,
     })
   end,
 }

@@ -1,0 +1,6 @@
+# Standard-library runtime and unittest suite; Ruff is a development-only tool.
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

@@ -12,6 +12,20 @@ and Apple clang 21.0.0. Node/npm are supplied by the existing shell environment;
 Mason health detected Node 22.15.0 and npm 10.9.2 during verification.
 Homebrew reported Neovim already current after refreshing its metadata.
 
+## Portable setup
+
+`manifests/tools.json` pins official Neovim 0.12.5, Tree-sitter CLI 0.27.0, and
+StyLua 2.5.2 artifacts and published SHA-256 digests for macOS ARM64 and Linux
+x86-64. Compatible existing tools are preserved; fallbacks stay profile-local.
+The manifest records minimum versions separately from managed fallback versions.
+Python 3.12+ runs the installer; Node 22+, npm, Java 21+, compilers, and other
+prerequisites are supplied by the host. Ruff 0.16.10 is development-only.
+
+`manifests/fedora.json` selects an immutable official Fedora 43 image index. CI
+uses its Linux x86-64 image and runs profile setup as non-root. The system's older
+Neovim remains separate. See the verification document for actual acceptance
+results; dependency pins alone do not prove platform compatibility.
+
 ## Plugin selections
 
 | Repository | Tag / full commit |

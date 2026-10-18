@@ -11,3 +11,5 @@ lazy/
 mason/
 parser/
 *.log
+__pycache__/
+.ruff_cache/

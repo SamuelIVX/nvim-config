@@ -1,0 +1,9 @@
+# Root prepares prerequisites; restore runs in an empty non-root home.
+ARG BASE
+FROM ${BASE}
+RUN dnf install -y python3 git gcc gcc-c++ make nodejs nodejs-npm java-21-openjdk-devel ripgrep fd-find curl tar gzip xz unzip wl-clipboard libatomic neovim shadow-utils && dnf clean all
+RUN useradd --create-home --uid 1000 restore
+COPY --chown=1000:1000 . /work
+USER restore
+WORKDIR /work
+CMD ["sh", "ci/check.sh"]

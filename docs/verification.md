@@ -8,6 +8,12 @@ metadata uses GitHub noreply addresses. A tracked-file scan found no matching
 credential patterns; this is not a guarantee against every possible secret.
 
 ## Checks performed
+Portable installer work: clean-home macOS installation of all three pinned
+fallback tools, repeated apply, configuration checks, and the complete real LSP
+suite passed locally. The installer regression suite and formatting checks are
+run separately. Fedora 43 hosted results and the implementation CodeRabbit
+review are pending; the original profile checks below remain prior evidence.
+
 - Shell launcher syntax, Lua formatting/syntax, startup, profile directory checks,
   theme, keymaps, sidebar open/close, file picker, bracket pairing, built-in snippet
   expansion, EditorConfig precedence, and attached Tree-sitter highlighting passed.

@@ -1,0 +1,56 @@
+{
+  "nvim": {
+    "version": "0.12.5",
+    "minimum": "0.12.0",
+    "platforms": {
+      "linux-x86_64": {
+        "url": "https://github.com/neovim/neovim/releases/download/v0.12.5/nvim-linux-x86_64.tar.gz",
+        "sha256": "bce0f56eda1f1b1db6eee8f4133d7a38813ea07933837dd1777411ca384c6875",
+        "format": "tar",
+        "executable": "nvim-linux-x86_64/bin/nvim"
+      },
+      "macos-arm64": {
+        "url": "https://github.com/neovim/neovim/releases/download/v0.12.5/nvim-macos-arm64.tar.gz",
+        "sha256": "65fb000099e47ca1b762584c484cc833f40e30851a0ec450d4174e16317c1f9b",
+        "format": "tar",
+        "executable": "nvim-macos-arm64/bin/nvim"
+      }
+    }
+  },
+  "tree-sitter": {
+    "version": "0.27.0",
+    "minimum": "0.26.1",
+    "platforms": {
+      "linux-x86_64": {
+        "url": "https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.0/tree-sitter-linux-x64.gz",
+        "sha256": "20a1f39ec1c45f2211492dcb8881c802b643b554bb196869a29ac3778277fa77",
+        "format": "gzip",
+        "executable": "tree-sitter"
+      },
+      "macos-arm64": {
+        "url": "https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.0/tree-sitter-macos-arm64.gz",
+        "sha256": "70f7573b2b2e5371a5b58cc5227d2ad981fd5374596b9874e770af486060774e",
+        "format": "gzip",
+        "executable": "tree-sitter"
+      }
+    }
+  },
+  "stylua": {
+    "version": "2.5.2",
+    "minimum": "2.5.2",
+    "platforms": {
+      "linux-x86_64": {
+        "url": "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64.zip",
+        "sha256": "bcb0d855e91f102f28a370e850f8566b3b44b79e6274d806ea5246837c0fd5ab",
+        "format": "zip",
+        "executable": "stylua"
+      },
+      "macos-arm64": {
+        "url": "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-macos-aarch64.zip",
+        "sha256": "92ff0889e16324801bc072692974bb67f8161e62010fc90f96c62a17f81f32c7",
+        "format": "zip",
+        "executable": "stylua"
+      }
+    }
+  }
+}
