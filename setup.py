@@ -227,6 +227,7 @@ def extract_archive(source: Path, destination: Path, kind: str, executable: str)
     """Extract release bytes without permitting links, special files, or path traversal."""
 
     def safe_name(name: str) -> None:
+        """Reject archive names that can escape staging or use ambiguous separators."""
         path = PurePosixPath(name)
         if path.is_absolute() or ".." in path.parts or "\\" in name:
             raise ValueError(f"Unsafe archive path: {name}")

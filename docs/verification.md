@@ -1,6 +1,7 @@
 # Verification
 
 ## TL;DR
+
 The isolated profile is installed locally. Plugin/tool installation and real LSP
 requests passed on macOS ARM64. The repository is published publicly at
 [SamuelIVX/nvim-config](https://github.com/SamuelIVX/nvim-config). Published commit
@@ -8,6 +9,7 @@ metadata uses GitHub noreply addresses. A tracked-file scan found no matching
 credential patterns; this is not a guarantee against every possible secret.
 
 ## Checks performed
+
 Portable installer work: clean-home macOS installation of all three pinned
 fallback tools, repeated apply, configuration checks, the complete real LSP suite,
 disconnect/reconnect, and purge passed locally. Adoption of the existing Mac
@@ -39,6 +41,7 @@ including the review fixes. The original profile checks below remain prior evide
   tools and Doxygen filetypes produced warnings; this setup does not require them.
 
 ## Review
+
 The portable implementation's first CodeRabbit pass completed with two minor
 findings. The missing Command Line Tools preflight was fixed with a regression
 test. Automatic rebinding of older managed-tool aliases was declined: the spec
@@ -52,6 +55,7 @@ major findings remain; automatic stale-alias rebinding remains intentionally
 declined. The PR's latest checks cover the final documentation/workflow fixes.
 
 ### Original profile review
+
 CodeRabbit's first completed review reported one major and one minor installation
 check issue. Both were independently confirmed against plugin source and fixed:
 wait for Mason installation completion and validate receipts/versions; check
@@ -64,7 +68,32 @@ update policy deliberately requires an explicit uninstall/reinstall, and the
 installer fails clearly on mismatches instead of overwriting an existing tool.
 No unresolved major findings remain. Two external review passes were performed.
 
+### PR feedback follow-up
+
+The GitHub CodeRabbit review at `a462069` completed with no actionable inline
+comments and a docstring coverage warning. Installer test fixtures, regression
+contracts, and nested validation/probe helpers now have explanatory docstrings;
+the remote coverage result must be rechecked after the next review.
+
+Graphify's four inline findings count callees in `make_plan`, `apply`, `verify`,
+and `main`. These functions coordinate existing, separately tested helpers.
+The counts alone identify no broken behavior or unnecessary dependency, so no
+wrapper layers or function splits were added solely to reduce the metric.
+
+Graphify also suggested the old-default-Neovim assertion would fail on macOS.
+The workflow explicitly puts a fake `nvim` reporting 0.11.6 on its restricted
+PATH before `ci/check.sh` runs; Fedora uses its older distro package. The check
+therefore deliberately verifies that managed tools affect `nv` alone. Existing
+successful hosted runs cover both paths, so that assertion remains intact.
+
+CodeRabbit's attached tool output also identified a shell assignment masking a
+failed Homebrew Java-prefix lookup. The lookup now runs separately from `export`,
+so the runner's error handling observes its exit status. Reported Markdown
+heading spacing was corrected. No runtime behavior or test assertions changed;
+documentation and workflow checks cover these edits without new test cases.
+
 ## Limits
+
 One idle snapshot measured about 17 MiB RSS for the editor. With a tiny Java
 project, the editor measured about 23 MiB and its Java server about 1,045 MiB after
 initialization. Before the heap adjustment the Java server measured about 2,212

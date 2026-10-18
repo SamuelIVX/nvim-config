@@ -24,6 +24,7 @@ class InstallerTest(unittest.TestCase):
     """Exercise the installer without changing the user's home or contacting services."""
 
     def setUp(self):
+        """Keep every installer write inside a disposable home and reject accidental downloads."""
         self.temp = tempfile.TemporaryDirectory(prefix="nvim setup test ")
         self.addCleanup(self.temp.cleanup)
         self.home = Path(self.temp.name)
@@ -65,17 +66,20 @@ class InstallerTest(unittest.TestCase):
         self.addCleanup(self.download.stop)
 
     def prepare_receipt(self):
+        """Create recognized profile links and ownership for removal and verification cases."""
         for link, target in setup.expected_links(self.paths).items():
             link.parent.mkdir(parents=True, exist_ok=True)
             link.symlink_to(target)
         setup.write_receipt(self.paths, [])
 
     def fake_archive(self):
+        """Return a runnable fake release and pin its checksum for download tests."""
         payload = gzip.compress(b"#!/bin/sh\nprintf 'NVIM v0.12.5\\n'\n")
         self.tool["platforms"]["macos-arm64"]["sha256"] = hashlib.sha256(payload).hexdigest()
         return payload
 
     def test_preview_does_not_write_or_download(self):
+        """Planning must leave the home unchanged even when tools need downloading."""
         before = sorted(str(p) for p in self.home.rglob("*"))
         with (
             patch.object(setup, "prerequisites", return_value=[]),
@@ -87,6 +91,7 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual(before, sorted(str(p) for p in self.home.rglob("*")))
 
     def test_existing_compatible_tool_is_preserved(self):
+        """An acceptable PATH executable takes precedence over a fallback download."""
         with (
             patch.object(setup, "prerequisites", return_value=[]),
             patch.object(setup.shutil, "which", return_value="/existing/nvim"),
@@ -97,6 +102,7 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual(plan["tools"][0]["path"], "/existing/nvim")
 
     def test_old_tool_needs_explicit_install_flag(self):
+        """An outdated executable must not trigger an implicit installation."""
         with (
             patch.object(setup, "prerequisites", return_value=[]),
             patch.object(setup.shutil, "which", return_value="/existing/nvim"),
@@ -112,6 +118,7 @@ class InstallerTest(unittest.TestCase):
             )
 
     def test_platform_detection_rejects_atomic_and_other_releases(self):
+        """Only the supported Fedora release and non-Atomic installation are accepted."""
         with (
             patch.object(setup.platform, "system", return_value="Linux"),
             patch.object(setup.platform, "machine", return_value="x86_64"),
@@ -137,6 +144,7 @@ class InstallerTest(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "Unsupported", setup.host_platform)
 
     def test_mac_architecture_detection(self):
+        """Accept Apple Silicon and refuse untested Intel macOS artifacts."""
         with (
             patch.object(setup.platform, "system", return_value="Darwin"),
             patch.object(setup.platform, "machine", return_value="arm64"),
@@ -149,16 +157,19 @@ class InstallerTest(unittest.TestCase):
             self.assertRaises(ValueError, setup.host_platform)
 
     def test_relative_and_overlapping_xdg_roots_rejected(self):
+        """Reject ambiguous roots before they can compromise profile isolation."""
         with patch.dict(os.environ, {"XDG_DATA_HOME": "relative"}):
             self.assertRaises(ValueError, setup.profile_paths)
         with patch.dict(os.environ, {"XDG_DATA_HOME": str(self.home / ".config")}):
             self.assertRaises(ValueError, setup.profile_paths)
 
     def test_custom_xdg_paths_with_spaces(self):
+        """Preserve absolute custom XDG paths without splitting spaces."""
         with patch.dict(os.environ, {"XDG_DATA_HOME": str(self.home / "custom data")}):
             self.assertEqual(setup.profile_paths()["data"], self.home / "custom data/nvim-sam")
 
     def test_link_conflict_prevents_any_apply_changes(self):
+        """A conflicting config directory must prevent partial launcher or receipt writes."""
         self.paths["config"].mkdir(parents=True)
         with (
             patch.object(setup, "prerequisites", return_value=[]),
@@ -172,6 +183,7 @@ class InstallerTest(unittest.TestCase):
         self.assertFalse(self.paths["state"].exists())
 
     def test_matching_links_and_repeat_apply_keep_receipt_stable(self):
+        """Repeated apply adopts matching links without rewriting unchanged ownership."""
         with (
             patch.object(setup, "prerequisites", return_value=[]),
             patch.object(setup.shutil, "which", return_value="/existing/nvim"),
@@ -187,6 +199,7 @@ class InstallerTest(unittest.TestCase):
             self.assertTrue(setup.matches_link(link, target))
 
     def test_verified_download_is_published_and_reused(self):
+        """Publish a runnable verified tool and reuse it without another network request."""
         payload = self.fake_archive()
         with patch.object(
             setup.urllib.request, "urlopen", return_value=io.BytesIO(payload)
@@ -199,6 +212,7 @@ class InstallerTest(unittest.TestCase):
         self.assertTrue(alias.is_symlink())
 
     def test_bad_checksum_does_not_publish_executable(self):
+        """Untrusted release bytes must never become a selected executable."""
         self.fake_archive()
         with patch.object(setup.urllib.request, "urlopen", return_value=io.BytesIO(b"bad bytes")):
             self.assertRaisesRegex(
@@ -213,6 +227,7 @@ class InstallerTest(unittest.TestCase):
         self.assertFalse((self.paths["data"] / "tools/bin/nvim").exists())
 
     def test_interrupted_download_can_retry(self):
+        """A failed transfer must leave no partial cache entry that blocks retry."""
         payload = self.fake_archive()
         with patch.object(setup.urllib.request, "urlopen", side_effect=OSError("interrupted")):
             self.assertRaises(
@@ -223,6 +238,7 @@ class InstallerTest(unittest.TestCase):
             setup.install_tool(self.paths, "nvim", self.tool, "macos-arm64")
 
     def test_incomplete_tool_directory_is_not_overwritten(self):
+        """Preserve files in an existing installation that lacks completion evidence."""
         package = self.paths["data"] / "tools/nvim/0.12.5"
         package.mkdir(parents=True)
         (package / "personal").write_text("keep")
@@ -238,6 +254,7 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual((package / "personal").read_text(), "keep")
 
     def test_tar_traversal_links_and_special_files_are_rejected(self):
+        """Reject tar entries that escape staging or introduce links and special files."""
         for name, kind in [
             ("../escape", tarfile.REGTYPE),
             ("/absolute", tarfile.REGTYPE),
@@ -258,6 +275,7 @@ class InstallerTest(unittest.TestCase):
         self.assertFalse((self.home / "escape").exists())
 
     def test_zip_traversal_and_symlink_rejected(self):
+        """Reject unsafe ZIP paths and encoded symlinks before extraction."""
         for name, mode in [("../escape", 0), ("/absolute", 0), ("link", 0o120777 << 16)]:
             source = self.home / "malicious.zip"
             with zipfile.ZipFile(source, "w") as archive:
@@ -267,6 +285,7 @@ class InstallerTest(unittest.TestCase):
             self.assertRaises(ValueError, setup.extract_archive, source, self.repo, "zip", "nvim")
 
     def test_unknown_managed_alias_is_a_conflict(self):
+        """A link under tools/bin is not sufficient evidence of installer ownership."""
         alias = self.paths["data"] / "tools/bin/nvim"
         alias.parent.mkdir(parents=True)
         alias.symlink_to(self.home / "someone-elses-binary")
@@ -276,6 +295,7 @@ class InstallerTest(unittest.TestCase):
             )
 
     def test_remove_preserves_repository_and_downloads(self):
+        """Disconnect removes only recognized links and retains reusable runtime data."""
         self.prepare_receipt()
         self.paths["data"].mkdir(parents=True)
         (self.paths["data"] / "keep").write_text("runtime")
@@ -285,6 +305,7 @@ class InstallerTest(unittest.TestCase):
         self.assertFalse(os.path.lexists(self.paths["config"]))
 
     def test_purge_does_not_follow_nested_symlinks(self):
+        """Purge preserves symlink targets, the default profile, and the source checkout."""
         self.prepare_receipt()
         external = self.home / "external"
         external.mkdir()
@@ -300,6 +321,7 @@ class InstallerTest(unittest.TestCase):
         self.assertFalse(self.paths["state"].exists())
 
     def test_purge_rejects_redirected_root_before_unlinking(self):
+        """A redirected runtime root must abort purge before disconnecting the profile."""
         self.prepare_receipt()
         self.paths["data"].parent.mkdir(parents=True, exist_ok=True)
         self.paths["data"].symlink_to(self.repo)
@@ -307,6 +329,7 @@ class InstallerTest(unittest.TestCase):
         self.assertTrue(self.paths["config"].is_symlink())
 
     def test_remove_rejects_changed_destination_and_forged_receipt(self):
+        """Refuse changed launchers and receipts claiming ownership of different roots."""
         self.prepare_receipt()
         self.paths["launcher"].unlink()
         self.paths["launcher"].write_text("new user script")
@@ -319,11 +342,13 @@ class InstallerTest(unittest.TestCase):
         self.assertRaises(ValueError, setup.read_receipt, self.paths)
 
     def test_jdtls_java_home_takes_precedence(self):
+        """Check the JVM JDTLS actually selects even when PATH could offer a newer Java."""
         jdk = self.home / "jdk/bin"
         jdk.mkdir(parents=True)
         (jdk / "java").touch()
 
         def probe(argv):
+            """Simulate an outdated JAVA_HOME JVM independently of PATH probes."""
             return 'openjdk version "17.0.0"' if argv[0] == str(jdk / "java") else ""
 
         with (
@@ -335,7 +360,10 @@ class InstallerTest(unittest.TestCase):
             self.assertIn("Java >=21 (check JAVA_HOME)", setup.prerequisites("macos-arm64"))
 
     def test_mac_compiler_stubs_do_not_prove_command_line_tools_are_installed(self):
+        """Require xcode-select evidence because macOS compiler stubs can exist alone."""
+
         def probe(argv):
+            """Expose compiler stubs while simulating a missing Command Line Tools selection."""
             return 'openjdk version "21.0.1"' if argv[-1] == "-version" else ""
 
         with (
@@ -349,6 +377,7 @@ class InstallerTest(unittest.TestCase):
             )
 
     def test_launcher_scopes_managed_path_and_forwards_arguments(self):
+        """Only the child editor receives the managed PATH and intact filename argument."""
         launcher = Path(__file__).parents[1] / "bin/nv"
         binary = self.paths["data"] / "tools/bin/nvim"
         binary.parent.mkdir(parents=True)
@@ -361,6 +390,7 @@ class InstallerTest(unittest.TestCase):
         self.assertNotIn(str(binary.parent), os.environ["PATH"].split(os.pathsep))
 
     def test_operation_lock_blocks_a_second_process(self):
+        """Concurrent setup processes must fail to lock until the first operation exits."""
         with setup.operation_lock(self.paths):
             code = "import os,fcntl,sys; fd=os.open(sys.argv[1],os.O_RDONLY|os.O_DIRECTORY); fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)"
             result = subprocess.run(
@@ -371,6 +401,7 @@ class InstallerTest(unittest.TestCase):
             pass
 
     def test_verify_missing_plugin_fails_without_starting_editor(self):
+        """Reject missing locked plugins before Neovim could bootstrap downloads."""
         self.prepare_receipt()
         (self.repo / "lazy-lock.json").write_text('{"lazy.nvim":{"commit":"expected"}}')
         with (
@@ -386,6 +417,7 @@ class InstallerTest(unittest.TestCase):
             editor.assert_not_called()
 
     def test_cached_download_symlink_is_rejected(self):
+        """A dangling cached-archive symlink must not redirect a download or be replaced."""
         self.fake_archive()
         cache = self.paths["cache"] / "downloads"
         cache.mkdir(parents=True)
@@ -403,10 +435,12 @@ class InstallerTest(unittest.TestCase):
         self.assertTrue((cache / digest).is_symlink())
 
     def test_runtime_roots_cannot_contain_source(self):
+        """Refuse roots whose purge could delete the configuration checkout."""
         with patch.object(setup, "REPO", (self.paths["data"] / "checkout").resolve()):
             self.assertRaisesRegex(ValueError, "repository", setup.guard_roots, self.paths)
 
     def test_manifest_has_complete_pins_for_both_targets(self):
+        """Require immutable official release URLs and full digests for each target."""
         source = Path(__file__).parents[1] / "manifests/tools.json"
         manifest = json.loads(source.read_text())
         self.assertEqual(set(manifest), {"nvim", "tree-sitter", "stylua"})

@@ -45,7 +45,8 @@ jobs:
       - name: Test fresh setup without preinstalled editor tools
         run: |
           test "$(uname -m)" = arm64
-          export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"
+          java_prefix=$(brew --prefix openjdk@21)
+          export JAVA_HOME="$java_prefix/libexec/openjdk.jdk/Contents/Home"
           task_home=$(mktemp -d)
           task_bin=$(mktemp -d)
           for tool in python3 node npm npx git cc c++ clang clang++ make rg fd curl tar gzip unzip xz; do

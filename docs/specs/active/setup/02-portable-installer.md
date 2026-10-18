@@ -1,6 +1,7 @@
 # Portable Neovim setup for macOS and Fedora 43
 
 ## TL;DR
+
 Implemented on the feature branch; acceptance evidence is recorded in
 [verification](../../../verification.md). Extend this repository with a Python standard-library
 installer supporting preview, explicit tool installation, verification, safe
@@ -12,6 +13,7 @@ The plan received a completed CodeRabbit review with zero findings. Implementati
 requires its own review and acceptance evidence before completion.
 
 ## Purpose and success criteria
+
 Restore the same Neovim configuration on Sam's Mac and Fedora workstation without
 copying binaries between operating systems or replacing unrelated configuration.
 A clean supported machine can install prerequisites, preview the operation, apply
@@ -19,6 +21,7 @@ the setup, verify it, and repeat apply without unnecessary changes. Both normal
 removal and explicit purge must preserve the repository and default Neovim data.
 
 ## Evidence and supported platforms
+
 - [verified] The existing macOS workflow passed at `90f3dd1`:
   [hosted result](https://github.com/SamuelIVX/nvim-config/actions/runs/39097306823).
 - [verified] Fedora 43 lists Neovim 0.11.6 and Tree-sitter CLI 0.25.10. This
@@ -36,6 +39,7 @@ removal and explicit purge must preserve the repository and default Neovim data.
   unverified until detection runs there.
 
 ## Public interface
+
 Require Python 3.12+; add `setup.py` with these commands:
 
 ```sh
@@ -48,6 +52,7 @@ python3 setup.py remove --purge
 ```
 
 ### Preview and installation
+
 - `plan` is read-only and performs no downloads or directory creation. Report
   prerequisites, selected executables, proposed downloads, link changes, and
   conflicts. `--install-tools` previews the additional managed-tool actions.
@@ -60,6 +65,7 @@ python3 setup.py remove --purge
   conflicts, and failed installation or verification.
 
 ### Verification and removal
+
 - `verify` checks selected executable versions, isolated paths, plugin revisions,
   Mason receipts, parser binaries, and existing editor behavior checks. Check
   prerequisites before startup; verification must not silently install tools.
@@ -73,6 +79,7 @@ python3 setup.py remove --purge
   configuration, or the default Neovim profile.
 
 ## Dependency ownership and selection
+
 Preserve compatible existing tools. Managed fallbacks use the already tested
 versions: Neovim 0.12.5, Tree-sitter CLI 0.27.0, and StyLua 2.5.2.
 
@@ -96,6 +103,7 @@ System prerequisites remain human-managed:
   global PATH, or change Java alternatives automatically.
 
 ## Isolation and existing behavior
+
 Update `bin/nv` to expose managed tools only within the launched profile's process
 environment. It must select the managed compatible Neovim when Fedora's normal
 `nvim` is too old, while preserving the ordinary `nvim` command outside `nv`.
@@ -113,6 +121,7 @@ Promote the existing installation helper out of the tests directory and update
 its callers. Keep one authoritative parser/server inventory.
 
 ## Conflicts, repeat runs, and failure recovery
+
 - Refuse differing files, directories, and symlinks at managed destinations.
   Accept existing links only when they resolve to this repository's expected
   targets, including the exact matching links on the existing Mac.
@@ -130,6 +139,7 @@ its callers. Keep one authoritative parser/server inventory.
   roots, and never follows nested symlinks into external directories.
 
 ## Test and acceptance plan
+
 Use temporary homes and standard-library installer tests for preview immutability,
 platform detection, compatible and incompatible tool selection, checksum failure,
 unsafe archives, interrupted installation, conflicting destinations, XDG roots,
@@ -152,6 +162,7 @@ planning; hosted Fedora execution was required acceptance work. See verification
 for the completed hosted results.
 
 ## Delivery and non-goals
+
 Implement on a feature branch. Run the required CodeRabbit review and obtain green
 macOS/Fedora CI before presenting implementation as complete. Update the setup
 specs, README, dependency inventory, verification evidence, and machine context.
@@ -162,6 +173,7 @@ desktop configuration changes, and automatic global package management are not
 included. Profile isolation is not a security sandbox.
 
 ## Sources
+
 - [Fedora Neovim packages](https://packages.fedoraproject.org/pkgs/neovim/neovim/)
 - [Fedora Tree-sitter CLI packages](https://packages.fedoraproject.org/pkgs/rust-tree-sitter-cli/tree-sitter-cli/index.html)
 - [Neovim 0.12.5 release](https://github.com/neovim/neovim/releases/tag/v0.12.5)
