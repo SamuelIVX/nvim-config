@@ -148,7 +148,8 @@ produce no unnecessary managed-path changes and no source/lockfile drift.
 Desktop clipboard and font checks require a graphical session. Report these
 separately from headless container results. Do not claim Fedora workstation
 validation based on hosted CI. Local container tools were unavailable during
-planning; hosted Fedora execution remains future acceptance work.
+planning; hosted Fedora execution was required acceptance work. See verification
+for the completed hosted results.
 
 ## Delivery and non-goals
 Implement on a feature branch. Run the required CodeRabbit review and obtain green

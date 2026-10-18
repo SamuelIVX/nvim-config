@@ -16,9 +16,11 @@ Python formatting/lint, shell syntax, and Lua formatting passed.
 
 [Hosted run 39099820980](https://github.com/SamuelIVX/nvim-config/actions/runs/39099820980)
 passed lint plus full restore, repeat, LSP, disconnect/reconnect, and purge checks
-on Fedora 43 x86-64 (non-root container) and macOS ARM64. Subsequent review fixes
-are verified in the PR's latest checks before completion. The original profile
-checks below remain prior evidence.
+on Fedora 43 x86-64 (non-root container) and macOS ARM64. Final implementation
+commit `7ac220a` passed both
+[push](https://github.com/SamuelIVX/nvim-config/actions/runs/39100218265) and
+[PR](https://github.com/SamuelIVX/nvim-config/actions/runs/39100220916) workflows,
+including the review fixes. The original profile checks below remain prior evidence.
 
 - Shell launcher syntax, Lua formatting/syntax, startup, profile directory checks,
   theme, keymaps, sidebar open/close, file picker, bracket pairing, built-in snippet
