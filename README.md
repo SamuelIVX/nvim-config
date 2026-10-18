@@ -112,7 +112,7 @@ Keep [DEPENDENCIES.md](DEPENDENCIES.md) in sync with verified installations.
 
 To disconnect the profile, remove only the two symlinks after verifying their
 targets. The repository and downloaded profile data remain available. Plain
-`nvim` continues to work independently. No GitHub remote is configured by setup.
+`nvim` continues to work independently.
 
 ## Map and design
 

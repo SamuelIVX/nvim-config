@@ -2,7 +2,10 @@
 
 ## TL;DR
 The isolated profile is installed locally. Plugin/tool installation and real LSP
-requests passed on macOS ARM64. Nothing has been published to GitHub.
+requests passed on macOS ARM64. The repository is published publicly at
+[SamuelIVX/nvim-config](https://github.com/SamuelIVX/nvim-config). Published commit
+metadata uses GitHub noreply addresses. A tracked-file scan found no matching
+credential patterns; this is not a guarantee against every possible secret.
 
 ## Checks performed
 - Shell launcher syntax, Lua formatting/syntax, startup, profile directory checks,
@@ -41,6 +44,7 @@ initialization. Before the heap adjustment the Java server measured about 2,212
 MiB. These are short snapshots, not peak-memory or large-project benchmarks.
 
 Checks used headless Neovim and real server processes. Visual appearance in Sam's
-interactive Terminal.app and hosted GitHub Actions execution remain unverified.
+interactive Terminal.app remains unverified. Hosted check results are available
+in [GitHub Actions](https://github.com/SamuelIVX/nvim-config/actions).
 The tests cover small projects, not large repository indexing or every supported
 language dialect. Java can need a larger heap for large projects.
