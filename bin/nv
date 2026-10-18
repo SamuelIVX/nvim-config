@@ -1,3 +1,7 @@
 #!/bin/sh
-# Launch the independent profile while preserving every Neovim argument.
-exec env NVIM_APPNAME=nvim-sam nvim "$@"
+# Expose profile-owned tools to Neovim and its children, leaving the parent PATH alone.
+export NVIM_APPNAME=nvim-sam
+profile_data="${XDG_DATA_HOME:-$HOME/.local/share}/nvim-sam"
+PATH="$profile_data/tools/bin:$PATH"
+export PATH
+exec nvim "$@"

@@ -1,4 +1,4 @@
--- Finish asynchronous tool downloads explicitly; exit nonzero on failed installs.
+-- Install profile-local parsers and servers, checking completed installation receipts.
 local ok, err = xpcall(function()
   local registry = require("mason-registry")
   local refreshed, refresh_ok = false, false

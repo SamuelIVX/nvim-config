@@ -1,4 +1,4 @@
-# Verify a fresh isolated profile without depending on the developer's home data.
+# Validate portable restore on the target OS families and architectures.
 name: Check configuration
 on: [push, pull_request]
 permissions:
@@ -7,23 +7,55 @@ concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  check:
-    runs-on: macos-latest
-    timeout-minutes: 20
+  lint:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Install system tools
-        run: brew install neovim tree-sitter-cli stylua
-      - name: Connect profile
+        with:
+          persist-credentials: false
+      - name: Python and shell checks
         run: |
-          mkdir -p "$HOME/.config"
-          ln -s "$GITHUB_WORKSPACE" "$HOME/.config/nvim-sam"
-      - name: Install plugins and tools
-        run: |
-          bin/nv --headless -i NONE '+Lazy! restore' '+qa!'
-          bin/nv --headless -i NONE '+luafile tests/install.lua'
-      - name: Check configuration
-        run: |
+          python3 -m venv /tmp/nvim-lint
+          /tmp/nvim-lint/bin/pip install ruff==0.16.10
+          /tmp/nvim-lint/bin/ruff check setup.py tests/test_setup.py
+          /tmp/nvim-lint/bin/ruff format --check setup.py tests/test_setup.py
           sh -n bin/nv
-          stylua --check .
-          bin/nv --headless -i NONE '+luafile tests/check.lua'
+          sh -n ci/check.sh
+  fedora:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build and verify Fedora 43 as non-root
+        run: |
+          base=$(python3 -c 'import json; print(json.load(open("manifests/fedora.json"))["image"])')
+          docker build --build-arg BASE="$base" -f ci/Dockerfile.fedora -t nvim-fedora .
+          docker run --rm nvim-fedora
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install human-managed prerequisites
+        run: brew install python node openjdk@21 ripgrep fd
+      - name: Test fresh setup without preinstalled editor tools
+        run: |
+          test "$(uname -m)" = arm64
+          java_prefix=$(brew --prefix openjdk@21)
+          export JAVA_HOME="$java_prefix/libexec/openjdk.jdk/Contents/Home"
+          task_home=$(mktemp -d)
+          task_bin=$(mktemp -d)
+          for tool in python3 node npm npx git cc c++ clang clang++ make rg fd curl tar gzip unzip xz; do
+            ln -s "$(command -v "$tool")" "$task_bin/$tool"
+          done
+          ln -s "$JAVA_HOME/bin/java" "$task_bin/java"
+          # Prove nv does not replace an older editor outside its profile.
+          printf '#!/bin/sh\nprintf "NVIM v0.11.6\\n"\n' > "$task_bin/nvim"
+          chmod +x "$task_bin/nvim"
+          export HOME="$task_home" PATH="$task_bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          unset XDG_CONFIG_HOME XDG_DATA_HOME XDG_STATE_HOME XDG_CACHE_HOME
+          sh ci/check.sh
