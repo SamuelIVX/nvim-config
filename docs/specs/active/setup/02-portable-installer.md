@@ -1,7 +1,8 @@
 # Portable Neovim setup for macOS and Fedora 43
 
 ## TL;DR
-Implementation in progress. Extend this repository with a Python standard-library
+Implemented on the feature branch; acceptance evidence is recorded in
+[verification](../../../verification.md). Extend this repository with a Python standard-library
 installer supporting preview, explicit tool installation, verification, safe
 disconnection, and optional complete profile removal. Keep the existing look,
 keybindings, plugin pins, language servers, and independent `nv` profile.

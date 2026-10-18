@@ -19,7 +19,8 @@ jobs:
           /tmp/nvim-lint/bin/pip install ruff==0.16.10
           /tmp/nvim-lint/bin/ruff check setup.py tests/test_setup.py
           /tmp/nvim-lint/bin/ruff format --check setup.py tests/test_setup.py
-          sh -n bin/nv ci/check.sh
+          sh -n bin/nv
+          sh -n ci/check.sh
   fedora:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

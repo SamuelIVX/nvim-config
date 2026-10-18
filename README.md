@@ -31,6 +31,7 @@ On macOS, install Command Line Tools and these Homebrew prerequisites as needed:
 
 ```sh
 brew install python git node openjdk ripgrep fd
+export JAVA_HOME="$(brew --prefix openjdk)/libexec/openjdk.jdk/Contents/Home"
 ```
 
 Node 22+, npm, Python 3.9+ on PATH for JDTLS, C/C++ compilers, make, and Java 21+
@@ -96,6 +97,7 @@ Run these from the repository root after installing plugins and tools:
 
 ```sh
 sh -n bin/nv
+sh -n ci/check.sh
 python3 -m unittest discover -s tests -p 'test_*.py'
 uvx ruff==0.16.10 check setup.py tests/test_setup.py
 uvx ruff==0.16.10 format --check setup.py tests/test_setup.py

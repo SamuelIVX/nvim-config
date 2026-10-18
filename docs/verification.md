@@ -42,7 +42,12 @@ findings. The missing Command Line Tools preflight was fixed with a regression
 test. Automatic rebinding of older managed-tool aliases was declined: the spec
 requires refusing unexpected targets, and directory membership alone does not
 prove ownership. Explicit pin changes and manual selection-link removal are
-documented. A final implementation review follows the fixes.
+documented.
+The second implementation review completed with two minor findings: add the
+Homebrew `JAVA_HOME` export to the Mac instructions, and syntax-check both shell
+scripts separately in CI. Both were fixed and locally validated. No unresolved
+major findings remain; automatic stale-alias rebinding remains intentionally
+declined. The PR's latest checks cover the final documentation/workflow fixes.
 
 ### Original profile review
 CodeRabbit's first completed review reported one major and one minor installation
