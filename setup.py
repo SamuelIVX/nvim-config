@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterator
 from contextlib import contextmanager
 import fcntl
 import gzip
@@ -114,7 +115,7 @@ def command_output(argv: list[str]) -> str:
 
 
 @contextmanager
-def operation_lock(paths: dict[str, Path]):
+def operation_lock(paths: dict[str, Path]) -> Iterator[None]:
     """Serialize operations on the state parent, which survives profile purge."""
     parent = paths["state"].parent
     parent.mkdir(parents=True, exist_ok=True)
@@ -154,6 +155,8 @@ def prerequisites(host: str) -> list[str]:
     ):
         if not shutil.which(name):
             missing.append(name)
+    if host == "macos-arm64" and not command_output(["xcode-select", "-p"]).strip():
+        missing.append("Command Line Tools (run xcode-select --install)")
     if version_of(shutil.which("node") or "node") < (22, 0, 0):
         missing.append("Node.js >=22")
     if version_of(shutil.which("python3") or "python3") < (3, 9, 0):
@@ -197,6 +200,7 @@ def make_plan(paths: dict[str, Path], host: str, manifest: dict, install_tools: 
             errors.append(f"Redirected managed package directory: {package}")
             continue
         if os.path.lexists(alias) and not matches_link(alias, managed):
+            # Being under tools/ is not proof an alias belongs to this manifest.
             errors.append(f"Conflicting managed executable link: {alias}")
             continue
         current = str(alias) if alias.is_symlink() else shutil.which(name)
@@ -319,6 +323,8 @@ def read_receipt(paths: dict[str, Path]) -> dict | None:
     if not file.exists():
         return None
     receipt = json.loads(file.read_text())
+    if not isinstance(receipt, dict):
+        raise ValueError("Invalid setup receipt; expected an ownership object")
     expected = {kind: str(path) for kind, path in paths.items()}
     if (
         receipt.get("schema") != 1

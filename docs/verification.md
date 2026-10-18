@@ -9,10 +9,16 @@ credential patterns; this is not a guarantee against every possible secret.
 
 ## Checks performed
 Portable installer work: clean-home macOS installation of all three pinned
-fallback tools, repeated apply, configuration checks, and the complete real LSP
-suite passed locally. The installer regression suite and formatting checks are
-run separately. Fedora 43 hosted results and the implementation CodeRabbit
-review are pending; the original profile checks below remain prior evidence.
+fallback tools, repeated apply, configuration checks, the complete real LSP suite,
+disconnect/reconnect, and purge passed locally. Adoption of the existing Mac
+profile and its full LSP verification also passed. The 28-test installer suite,
+Python formatting/lint, shell syntax, and Lua formatting passed.
+
+[Hosted run 39099820980](https://github.com/SamuelIVX/nvim-config/actions/runs/39099820980)
+passed lint plus full restore, repeat, LSP, disconnect/reconnect, and purge checks
+on Fedora 43 x86-64 (non-root container) and macOS ARM64. Subsequent review fixes
+are verified in the PR's latest checks before completion. The original profile
+checks below remain prior evidence.
 
 - Shell launcher syntax, Lua formatting/syntax, startup, profile directory checks,
   theme, keymaps, sidebar open/close, file picker, bracket pairing, built-in snippet
@@ -31,6 +37,14 @@ review are pending; the original profile checks below remain prior evidence.
   tools and Doxygen filetypes produced warnings; this setup does not require them.
 
 ## Review
+The portable implementation's first CodeRabbit pass completed with two minor
+findings. The missing Command Line Tools preflight was fixed with a regression
+test. Automatic rebinding of older managed-tool aliases was declined: the spec
+requires refusing unexpected targets, and directory membership alone does not
+prove ownership. Explicit pin changes and manual selection-link removal are
+documented. A final implementation review follows the fixes.
+
+### Original profile review
 CodeRabbit's first completed review reported one major and one minor installation
 check issue. Both were independently confirmed against plugin source and fixed:
 wait for Mason installation completion and validate receipts/versions; check

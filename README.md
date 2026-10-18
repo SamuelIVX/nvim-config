@@ -122,6 +122,12 @@ resolved revisions. Edit the intended tag/commit, use `:Lazy update`, rerun chec
 and review the lockfile diff. `:Lazy restore` restores the recorded revisions.
 The plugin manager itself is pinned too. Automatic update checking is disabled.
 
+Fallback tool pins are in `manifests/tools.json`. Setup does not automatically
+rebind a link pointing at a different tool version. When deliberately changing a
+pin, inspect and remove that tool's old selection link under the profile's
+`tools/bin/`, then rerun `apply --install-tools`. Existing versioned downloads
+remain available. A path inside `tools/` alone is not proof of installer ownership.
+
 Mason is the installer for language servers; it does not manage project packages.
 Its pinned inventory lives in `lua/conf/tools.lua`. Those versions are separate
 from the plugin lock. Changing a version does not overwrite an already-installed

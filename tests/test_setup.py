@@ -334,6 +334,20 @@ class InstallerTest(unittest.TestCase):
         ):
             self.assertIn("Java >=21 (check JAVA_HOME)", setup.prerequisites("macos-arm64"))
 
+    def test_mac_compiler_stubs_do_not_prove_command_line_tools_are_installed(self):
+        def probe(argv):
+            return 'openjdk version "21.0.1"' if argv[-1] == "-version" else ""
+
+        with (
+            patch.object(setup.shutil, "which", return_value="/usr/bin/tool"),
+            patch.object(setup, "version_of", return_value=(25, 0, 0)),
+            patch.object(setup, "command_output", side_effect=probe),
+        ):
+            self.assertIn(
+                "Command Line Tools (run xcode-select --install)",
+                setup.prerequisites("macos-arm64"),
+            )
+
     def test_launcher_scopes_managed_path_and_forwards_arguments(self):
         launcher = Path(__file__).parents[1] / "bin/nv"
         binary = self.paths["data"] / "tools/bin/nvim"

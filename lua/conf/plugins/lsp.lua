@@ -34,8 +34,15 @@ return {
         )
       end,
     })
-    require("mason-lspconfig").setup({
-      ensure_installed = vim.env.NVIM_CONFIG_OPERATION and {} or require("conf.tools").servers,
-    })
+    if vim.env.NVIM_CONFIG_OPERATION == "verify" then
+      -- Verification uses local tools only; Mason setup may refresh a stale registry.
+      for _, identifier in ipairs(require("conf.tools").servers) do
+        vim.lsp.enable(identifier:match("^([^@]+)"))
+      end
+    else
+      require("mason-lspconfig").setup({
+        ensure_installed = vim.env.NVIM_CONFIG_OPERATION and {} or require("conf.tools").servers,
+      })
+    end
   end,
 }
