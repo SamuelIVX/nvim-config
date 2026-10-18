@@ -1,0 +1,4 @@
+# Shared Lua formatting for source and headless checks.
+column_width = 100
+indent_type = "Spaces"
+indent_width = 2

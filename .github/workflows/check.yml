@@ -1,0 +1,29 @@
+# Verify a fresh isolated profile without depending on the developer's home data.
+name: Check configuration
+on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install system tools
+        run: brew install neovim tree-sitter-cli stylua
+      - name: Connect profile
+        run: |
+          mkdir -p "$HOME/.config"
+          ln -s "$GITHUB_WORKSPACE" "$HOME/.config/nvim-sam"
+      - name: Install plugins and tools
+        run: |
+          bin/nv --headless -i NONE '+Lazy! restore' '+qa!'
+          bin/nv --headless -i NONE '+luafile tests/install.lua'
+      - name: Check configuration
+        run: |
+          sh -n bin/nv
+          stylua --check .
+          bin/nv --headless -i NONE '+luafile tests/check.lua'

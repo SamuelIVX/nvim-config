@@ -1,0 +1,13 @@
+# Runtime downloads and private/local files never belong in the configuration.
+.DS_Store
+.env
+.env.*
+*.swp
+*.swo
+*~
+.luarc.json
+node_modules/
+lazy/
+mason/
+parser/
+*.log
